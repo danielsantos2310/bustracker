@@ -2,104 +2,144 @@
 let map;
 let busMarkers = [];
 let routePolylines = [];
-let busRoutes = {};
-let selectedRoute = null;
+let selectedDirection = 'northbound';
 let busInterval;
+let infoWindows = [];
 
-// Real bus routes of João Pessoa (approximate coordinates)
+// Detailed route configuration for Line 527
 const jpBusRoutes = {
-    "510": {
-        name: "510 - Centro ↔ Manaíra",
-        path: [
-            [-7.1195, -34.8450], // Centro
-            [-7.1200, -34.8420], // Av. Epitácio Pessoa
-            [-7.1215, -34.8380], // Tambiá
-            [-7.1230, -34.8350], // Manaíra
-            [-7.1245, -34.8320]  // Cabo Branco
-        ],
-        color: "#FF0000"
-    },
-    "210": {
-        name: "210 - Altiplano ↔ Bessa",
-        path: [
-            [-7.1150, -34.8400], // Altiplano
-            [-7.1165, -34.8370], // Bancários
-            [-7.1180, -34.8340], // Miramar
-            [-7.1195, -34.8310]  // Bessa
-        ],
-        color: "#00AA00"
-    },
-    "301": {
-        name: "301 - Valentina ↔ Cabo Branco",
-        path: [
-            [-7.1300, -34.8500], // Valentina
-            [-7.1250, -34.8450], // Geisel
-            [-7.1200, -34.8400], // Centro
-            [-7.1150, -34.8350]  // Cabo Branco
-        ],
-        color: "#0000FF"
+    "527": {
+        name: "527 - Integração Norte Sul",
+        color: "#FF6600",
+        directions: {
+            northbound: {
+                path: [
+                    // Starting from Terminal Integração Norte (Via Expressa Padre Zé)
+                    [-7.1180, -34.8825], // Terminal Integração Norte
+                    [-7.1190, -34.8810], // Rua Vereador João Freire
+                    [-7.1200, -34.8795],
+                    [-7.1210, -34.8775], 
+                    [-7.1223, -34.8757], // Hospital de Trauma
+                    [-7.1230, -34.8740], // Av. Comandante Matos Cardoso
+                    [-7.1237, -34.8723],
+                    [-7.1244, -34.8705],
+                    [-7.1250, -34.8690], // Shopping Tambiá
+                    [-7.1258, -34.8672],
+                    [-7.1265, -34.8655], // Praça das Muriçocas
+                    [-7.1272, -34.8635],
+                    [-7.1278, -34.8620], // UFPB
+                    [-7.1285, -34.8600],
+                    [-7.1290, -34.8585],
+                    [-7.1295, -34.8570], // Viaduto BR-230
+                    [-7.1300, -34.8560], // Centro
+                    [-7.1308, -34.8540],
+                    [-7.1312, -34.8530], // Extra Bairro dos Estados
+                    [-7.1319, -34.8510],
+                    [-7.1324, -34.8500], // Praça Independência
+                    [-7.1331, -34.8478],
+                    [-7.1335, -34.8468], // Terminal Varadouro
+                    [-7.1342, -34.8449],
+                    [-7.1346, -34.8437]  // Terminal Integração Sul
+                ],
+                stops: [
+                    {name: "Terminal Integração Norte", position: [-7.1180, -34.8825]},
+                    {name: "Hospital de Trauma", position: [-7.1223, -34.8757]},
+                    {name: "Shopping Tambiá", position: [-7.1250, -34.8690]},
+                    {name: "UFPB", position: [-7.1278, -34.8620]},
+                    {name: "Centro", position: [-7.1300, -34.8560]},
+                    {name: "Praça Independência", position: [-7.1324, -34.8500]},
+                    {name: "Terminal Varadouro", position: [-7.1335, -34.8468]},
+                    {name: "Terminal Integração Sul", position: [-7.1346, -34.8437]}
+                ]
+            },
+            southbound: {
+                path: [
+                    [-7.1346, -34.8437], // Terminal Integração Sul
+                    [-7.1339, -34.8458],
+                    [-7.1335, -34.8468], // Terminal Varadouro
+                    [-7.1328, -34.8487],
+                    [-7.1324, -34.8500], // Praça Independência
+                    [-7.1317, -34.8515],
+                    [-7.1312, -34.8530], // Extra Bairro dos Estados
+                    [-7.1304, -34.8553],
+                    [-7.1300, -34.8560], // Centro
+                    [-7.1292, -34.8585],
+                    [-7.1286, -34.8600],
+                    [-7.1278, -34.8620], // UFPB
+                    [-7.1270, -34.8643],
+                    [-7.1262, -34.8665], // Praça das Muriçocas
+                    [-7.1253, -34.8686],
+                    [-7.1244, -34.8705],
+                    [-7.1235, -34.8726],
+                    [-7.1226, -34.8747],
+                    [-7.1218, -34.8768],
+                    [-7.1209, -34.8789],
+                    [-7.1198, -34.8809],
+                    [-7.1180, -34.8825]  // Terminal Integração Norte
+                ],
+                stops: [
+                    {name: "Terminal Integração Sul", position: [-7.1346, -34.8437]},
+                    {name: "Terminal Varadouro", position: [-7.1335, -34.8468]},
+                    {name: "Praça Independência", position: [-7.1324, -34.8500]},
+                    {name: "Centro", position: [-7.1300, -34.8560]},
+                    {name: "UFPB", position: [-7.1278, -34.8620]},
+                    {name: "Shopping Tambiá", position: [-7.1250, -34.8690]},
+                    {name: "Hospital de Trauma", position: [-7.1223, -34.8757]},
+                    {name: "Terminal Integração Norte", position: [-7.1180, -34.8825]}
+                ]
+            }
+        }
     }
 };
 
 // Initialize the map
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -7.1195, lng: -34.8450 },
-        zoom: 13,
+        center: { lat: -7.1278, lng: -34.8620 }, // Centered at UFPB
+        zoom: 14,
         mapTypeControl: true,
-        streetViewControl: false
+        streetViewControl: false,
+        fullscreenControl: false
     });
 
-    // Initialize route selector
-    initializeRouteSelector();
-    
-    // Load default route (510)
-    loadRoute("510");
-}
-
-// Initialize route dropdown
-function initializeRouteSelector() {
-    const routeSelect = document.getElementById("routeSelect");
-    
-    // Add options for each route
-    for (const routeId in jpBusRoutes) {
-        const option = document.createElement("option");
-        option.value = routeId;
-        option.textContent = jpBusRoutes[routeId].name;
-        routeSelect.appendChild(option);
-    }
-    
-    // Add event listener
-    routeSelect.addEventListener("change", (e) => {
-        loadRoute(e.target.value);
+    // Initialize controls
+    const directionSelect = document.getElementById("directionSelect");
+    directionSelect.addEventListener("change", (e) => {
+        selectedDirection = e.target.value;
+        loadRoute();
     });
+
+    document.getElementById("refreshBtn").addEventListener("click", loadRoute);
+
+    // Initial load
+    loadRoute();
 }
 
-// Load a specific route
-function loadRoute(routeId) {
-    // Clear existing buses and routes
+function loadRoute() {
+    // Clear existing elements
     clearBuses();
     clearRoutes();
-    
-    // Set selected route
-    selectedRoute = jpBusRoutes[routeId];
-    
-    // Draw the route
-    drawRoute(selectedRoute);
-    
-    // Initialize buses on this route
-    initializeBuses(selectedRoute);
-    
-    // Start bus movement
+    infoWindows.forEach(iw => iw.close());
+    infoWindows = [];
+
+    const route = jpBusRoutes["527"];
+    const direction = route.directions[selectedDirection];
+
+    if (!direction) {
+        console.error("Direction not found");
+        return;
+    }
+
+    // Draw route and elements
+    drawRoute(direction);
+    drawStops(direction);
+    initializeBuses(direction);
     startBusMovement();
-    
-    // Update info panel
-    updateBusInfo(selectedRoute.name);
+    updateBusInfo(direction);
 }
 
-// Draw the route path
-function drawRoute(route) {
-    const routePath = route.path.map(point => ({
+function drawRoute(direction) {
+    const routePath = direction.path.map(point => ({
         lat: point[0],
         lng: point[1]
     }));
@@ -107,115 +147,154 @@ function drawRoute(route) {
     const polyline = new google.maps.Polyline({
         path: routePath,
         geodesic: true,
-        strokeColor: route.color,
-        strokeOpacity: 0.7,
-        strokeWeight: 4,
+        strokeColor: jpBusRoutes["527"].color,
+        strokeOpacity: 0.8,
+        strokeWeight: 5,
         map: map
     });
     
     routePolylines.push(polyline);
     
-    // Fit map to route bounds
+    // Fit map to route bounds with padding
     const bounds = new google.maps.LatLngBounds();
     routePath.forEach(point => bounds.extend(point));
-    map.fitBounds(bounds);
+    map.fitBounds(bounds, {top: 50, bottom: 50, left: 50, right: 50});
 }
 
-// Initialize buses on the route
-function initializeBuses(route) {
-    // Create 3 buses for this route
-    for (let i = 0; i < 3; i++) {
-        // Distribute buses along the route
-        const segment = Math.floor(i * (route.path.length - 1) / 2);
-        const progress = (i * 0.5) % 1;
-        
-        const startPoint = route.path[segment];
-        const endPoint = route.path[segment + 1] || route.path[0];
-        
-        const lat = startPoint[0] + (endPoint[0] - startPoint[0]) * progress;
-        const lng = startPoint[1] + (endPoint[1] - startPoint[1]) * progress;
+function drawStops(direction) {
+    direction.stops.forEach((stop, index) => {
+        const marker = new google.maps.Marker({
+            position: { lat: stop.position[0], lng: stop.position[1] },
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: "#0056b3",
+                fillOpacity: 1,
+                strokeColor: "white",
+                strokeWeight: 2,
+                scale: 6
+            },
+            title: stop.name
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `<div class="info-window">
+                        <h4>${stop.name}</h4>
+                        <p>Ordem: ${index + 1}/${direction.stops.length}</p>
+                        <p>${direction.stops.length - index - 1} paradas restantes</p>
+                      </div>`
+        });
+
+        marker.addListener("click", () => {
+            infoWindows.forEach(iw => iw.close());
+            infoWindow.open(map, marker);
+        });
+        infoWindows.push(infoWindow);
+    });
+}
+
+function initializeBuses(direction) {
+    const numBuses = 3;
+    const segmentSize = Math.floor(direction.path.length / numBuses);
+
+    for (let i = 0; i < numBuses; i++) {
+        const startIndex = Math.min(i * segmentSize, direction.path.length - 2);
+        const progress = 0.1 + (i * 0.3);
         
         const marker = new google.maps.Marker({
-            position: { lat, lng },
+            position: calculateBusPosition(direction.path, startIndex, progress),
             map: map,
-            title: `Ônibus ${i+1} - ${route.name}`,
             icon: {
                 url: "https://maps.google.com/mapfiles/ms/icons/bus.png",
                 scaledSize: new google.maps.Size(32, 32),
                 anchor: new google.maps.Point(16, 16)
-            }
+            },
+            zIndex: 999
         });
-        
+
         busMarkers.push({
             marker,
-            route,
-            currentSegment: segment,
-            progress,
-            speed: 0.002 + Math.random() * 0.003 // Random speed
+            route: direction,
+            currentSegment: startIndex,
+            progress: progress,
+            speed: 0.001 + Math.random() * 0.0005
         });
     }
 }
 
-// Start bus movement animation
+function calculateBusPosition(path, segment, progress) {
+    const start = path[segment];
+    const end = path[segment + 1] || path[0];
+    
+    return {
+        lat: start[0] + (end[0] - start[0]) * progress,
+        lng: start[1] + (end[1] - start[1]) * progress
+    };
+}
+
 function startBusMovement() {
     if (busInterval) clearInterval(busInterval);
     
     busInterval = setInterval(() => {
         busMarkers.forEach(bus => {
-            const { marker, route, currentSegment } = bus;
+            const path = bus.route.path;
             
-            // Get current and next points
-            const path = route.path;
-            const startPoint = path[currentSegment];
-            const endPoint = path[currentSegment + 1] || path[0];
-            
-            // Update progress
             bus.progress += bus.speed;
             
-            // If reached end of segment
             if (bus.progress >= 1) {
-                bus.progress = 0;
                 bus.currentSegment = (bus.currentSegment + 1) % (path.length - 1);
+                bus.progress = 0;
+                
+                // Add random delay at stops
+                if (isNearStop(path[bus.currentSegment], bus.route.stops)) {
+                    bus.progress = -0.3 + Math.random() * 0.2;
+                }
             }
-            
-            // Calculate new position
-            const newLat = startPoint[0] + (endPoint[0] - startPoint[0]) * bus.progress;
-            const newLng = startPoint[1] + (endPoint[1] - startPoint[1]) * bus.progress;
-            
-            // Update marker position
-            marker.setPosition({ lat: newLat, lng: newLng });
+
+            const newPos = calculateBusPosition(path, bus.currentSegment, bus.progress);
+            bus.marker.setPosition(newPos);
         });
-    }, 50); // Update every 50ms for smooth animation
+    }, 50);
 }
 
-// Clear all buses from map
+function isNearStop(position, stops) {
+    const positionLatLng = new google.maps.LatLng(position[0], position[1]);
+    return stops.some(stop => {
+        const stopLatLng = new google.maps.LatLng(stop.position[0], stop.position[1]);
+        return google.maps.geometry.spherical.computeDistanceBetween(
+            positionLatLng,
+            stopLatLng
+        ) < 50; // 50 meters
+    });
+}
+
 function clearBuses() {
     busMarkers.forEach(bus => bus.marker.setMap(null));
     busMarkers = [];
     if (busInterval) clearInterval(busInterval);
 }
 
-// Clear all routes from map
 function clearRoutes() {
     routePolylines.forEach(line => line.setMap(null));
     routePolylines = [];
 }
 
-// Update bus information panel
-function updateBusInfo(info) {
+function updateBusInfo(direction) {
+    const nextStops = busMarkers.length > 0 
+        ? busMarkers[0].route.stops
+            .slice(busMarkers[0].currentSegment, busMarkers[0].currentSegment + 3)
+            .map(stop => `<div class="next-stop">→ ${stop.name}</div>`)
+            .join("")
+        : '<p>Carregando informações...</p>';
+
     document.getElementById("busInfo").innerHTML = `
-        <h3>${info}</h3>
-        <p>${busMarkers.length} ônibus em operação</p>
+        <h3>${selectedDirection === 'northbound' ? 'Norte' : 'Sul'} - ${busMarkers.length} ônibus ativos</h3>
         <p>Última atualização: ${new Date().toLocaleTimeString()}</p>
+        <div class="next-stops">
+            <h4>Próximas Paradas:</h4>
+            ${nextStops}
+        </div>
     `;
 }
 
-// Refresh button functionality
-document.getElementById("refreshBtn").addEventListener("click", () => {
-    if (selectedRoute) {
-        loadRoute(Object.keys(jpBusRoutes).find(key => jpBusRoutes[key] === selectedRoute));
-    }
-});
-
-// Initialize the app when Google Maps API is loaded
 window.initMap = initMap;

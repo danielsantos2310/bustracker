@@ -3,17 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreador de Ônibus - João Pessoa</title>
+    <title>Linha 527 - Rastreador de Ônibus JP</title>
     <link rel="stylesheet" href="bus.css">
 </head>
 <body>
     <header>
-        <h1>Rastreador de Ônibus - João Pessoa</h1>
+        <h1>Linha 527 - Integração Norte Sul</h1>
         <div class="controls">
-            <button id="refreshBtn">Atualizar Ônibus</button>
-            <div class="route-selector">
-                <label for="routeSelect">Selecione uma linha:</label>
-                <select id="routeSelect"></select>
+            <div class="route-controls">
+                <button id="refreshBtn">Atualizar Ônibus</button>
+                <div class="direction-selector">
+                    <label for="directionSelect">Direção:</label>
+                    <select id="directionSelect">
+                        <option value="northbound">Norte (CCHLA/CCTA)</option>
+                        <option value="southbound">Sul (Terminal Varadouro)</option>
+                    </select>
+                </div>
             </div>
         </div>
     </header>
