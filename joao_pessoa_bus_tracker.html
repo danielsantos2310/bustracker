@@ -1,16 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <title>João Pessoa Bus Tracker (Web)</title>
-  <style>
-    #map { height: 600px; width: 100%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador de Ônibus - João Pessoa</title>
+    <link rel="stylesheet" href="bus.css">
 </head>
 <body>
-  <h1>João Pessoa Bus Tracker</h1>
-  <div id="map"></div>
-  <script src="script.js"></script>
-  <!-- Load Google Maps API (replace YOUR_API_KEY) -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVJmZgNkEREnzO0G4a7vrW-GvgVgkfEOg&callback=initMap"></script>
+    <header>
+        <h1>Rastreador de Ônibus - João Pessoa</h1>
+        <div class="controls">
+            <button id="refreshBtn">Atualizar Ônibus</button>
+            <div class="route-selector">
+                <label for="routeSelect">Selecione uma linha:</label>
+                <select id="routeSelect"></select>
+            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div id="map"></div>
+        <div id="busInfo"></div>
+    </main>
+
+    <script src="script.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVJmZgNkEREnzO0G4a7vrW-GvgVgkfEOg&callback=initMap&libraries=geometry"></script>
 </body>
 </html>
