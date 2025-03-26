@@ -28,7 +28,27 @@
         <div id="busInfo"></div>
     </main>
 
+    <!-- Load scripts -->
     <script src="script.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDVJmZgNkEREnzO0G4a7vrW-GvgVgkfEOg&callback=initMap&libraries=geometry"></script>
+    <script>
+        function initializeApp() {
+            if (typeof google !== 'undefined' && typeof initMap === 'function') {
+                initMap();
+                document.getElementById('directionSelect').addEventListener('change', function() {
+                    selectedDirection = this.value;
+                    loadRoute();
+                });
+                document.getElementById('refreshBtn').addEventListener('click', loadRoute);
+            } else {
+                document.getElementById("map").innerHTML = 
+                    '<div style="padding:20px;color:red">Erro: API do Google Maps não carregou corretamente</div>';
+                console.error("Google Maps API failed to load");
+            }
+        }
+        window.addEventListener('load', initializeApp);
+    </script>
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=geometry&callback=initializeApp">
+    </script>
 </body>
 </html>
