@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linha 527 - Rastreador de Ônibus JP</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="leaflet_bus.css">
+</head>
+<body>
+    <header>
+        <h1>Linha 527 - Integração Norte Sul</h1>
+        <div class="controls">
+            <button id="refreshBtn">Atualizar Ônibus</button>
+            <select id="directionSelect">
+                <option value="northbound">Norte (CCHLA/CCTA)</option>
+                <option value="southbound">Sul (Terminal Varadouro)</option>
+            </select>
+        </div>
+    </header>
+    
+    <main>
+        <div id="map"></div>
+        <div id="busInfo"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="leaflet_script.js"></script>
+</body>
+</html>
