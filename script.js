@@ -1,95 +1,70 @@
-// Initialize map centered on João Pessoa
+// Configuração inicial
 const map = L.map('map').setView([-7.1195, -34.8450], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// Base map layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+// Variáveis globais
+let rotas = {};
+let rotaAtual = null;
 
-// Variables for route drawing
-let drawnItems = new L.FeatureGroup();
-map.addLayer(drawnItems);
-let drawControl = new L.Control.Draw({
-    draw: {
-        polyline: {
-            shapeOptions: {
-                color: '#0056b3',
-                weight: 5
-            }
-        },
-        polygon: false,
-        circle: false,
-        marker: false,
-        rectangle: false
-    },
-    edit: {
-        featureGroup: drawnItems
-    }
-});
+// Carregar rotas existentes
+if (typeof rotasPredefinidas !== 'undefined') {
+    rotas = {...rotasPredefinidas};
+    atualizarSeletor();
+}
 
-// Add drawing controls
-map.addControl(drawControl);
-
-// Reference to the current polyline
-let currentRoute = null;
-
-// Event listeners
-document.getElementById('draw-btn').addEventListener('click', () => {
-    new L.Draw.Polyline(map, drawControl.options.draw.polyline).enable();
-});
-
-document.getElementById('save-btn').addEventListener('click', () => {
-    if (!currentRoute) {
-        alert("Desenhe a rota primeiro!");
-        return;
-    }
+// Funções principais
+function criarRota(nome, coordenadas) {
+    rotas[nome] = {
+        nome: nome,
+        coordenadas: coordenadas
+    };
     
-    const coordinates = currentRoute.getLatLngs().map(ll => [ll.lat, ll.lng]);
-    console.log("Coordenadas da Rota:", coordinates);
-    alert(`Rota salva com ${coordinates.length} pontos!\nVerifique o console para os dados.`);
-});
+    // Criar arquivo JS (simulado)
+    const codigo = `// ${nome}.js\nconst rotasPredefinidas = rotasPredefinidas || {};\nrotasPredefinidas['${nome}'] = ${JSON.stringify(rotas[nome], null, 4)};\n`;
+    console.log('Código para salvar:\n\n' + codigo);
+}
 
-// Handle drawn routes
-map.on('draw:created', (e) => {
-    const type = e.layerType;
-    const layer = e.layer;
+function carregarRota(nome) {
+    if (!rotas[nome]) return;
     
-    if (type === 'polyline') {
-        // Clear previous route
-        drawnItems.clearLayers();
-        
-        // Add new route
-        drawnItems.addLayer(layer);
-        currentRoute = layer;
-        
-        // Add markers for key points
-        addKeyStops(layer.getLatLngs());
-    }
-});
+    if (rotaAtual) map.removeLayer(rotaAtual);
+    
+    rotaAtual = L.polyline(rotas[nome].coordenadas, {
+        color: '#0056b3',
+        weight: 5
+    }).addTo(map);
+    
+    map.fitBounds(rotaAtual.getBounds());
+}
 
-// Add stops based on your image
-function addKeyStops(path) {
-    const keyStops = [
-        { name: "UFPB", position: path[0] },
-        { name: "Epitácio", position: path[Math.floor(path.length/3)] },
-        { name: "Integração", position: path[path.length-1] }
-    ];
+function atualizarSeletor() {
+    const seletor = document.getElementById('seletor');
+    seletor.innerHTML = '<option value="">-- Selecione --</option>';
     
-    keyStops.forEach(stop => {
-        L.marker(stop.position, {
-            icon: L.divIcon({
-                className: 'stop-icon',
-                html: '🟠'
-            })
-        })
-        .bindPopup(`<b>${stop.name}</b>`)
-        .addTo(map);
+    Object.keys(rotas).forEach(nome => {
+        const option = document.createElement('option');
+        option.value = nome;
+        option.textContent = nome;
+        seletor.appendChild(option);
     });
 }
 
-// Load your reference image as overlay (optional)
-const imageBounds = [
-    [-7.18, -34.92], // SW corner
-    [-7.08, -34.80]  // NE corner
-];
-L.imageOverlay('https://i.imgur.com/REFERENCE_IMAGE.jpg', imageBounds).addTo(map);
+// Event Listeners
+document.getElementById('novarota').addEventListener('click', () => {
+    if (rotaAtual) map.removeLayer(rotaAtual);
+    rotaAtual = new L.Polyline([], {color: '#0056b3'}).addTo(map);
+});
+
+document.getElementById('salvar').addEventListener('click', () => {
+    const nome = document.getElementById('nome').value.trim();
+    if (!nome || !rotaAtual) return alert('Dados incompletos!');
+    
+    const coordenadas = rotaAtual.getLatLngs().map(p => [p.lat, p.lng]);
+    criarRota(nome, coordenadas);
+    atualizarSeletor();
+    alert('Rota salva! Verifique o console para o código.');
+});
+
+document.getElementById('seletor').addEventListener('change', (e) => {
+    carregarRota(e.target.value);
+});

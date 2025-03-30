@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linha 527 - Rastreador Oficial</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <title>Editor de Rotas de Ônibus</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>Linha 527 - UFPB ↔ Epitácio ↔ Integração</h1>
-        <div class="controls">
-            <button id="draw-btn">✏️ Traçar Rota Manualmente</button>
-            <button id="save-btn">💾 Salvar Rota</button>
-        </div>
+    <div class="container">
+        <header>
+            <h1>Editor de Rotas</h1>
+            <div class="controls">
+                <button id="novarota">✏️ Nova Rota</button>
+                <input type="text" id="nome" placeholder="Nome da rota">
+                <button id="salvar">💾 Salvar</button>
+                <select id="seletor">
+                    <option value="">-- Selecione --</option>
+                </select>
+            </div>
+        </header>
+        <div id="map"></div>
     </div>
-    
-    <div id="map"></div>
 
+    <!-- Carregue suas rotas aqui -->
+    <script src="rotas/linha-527.js"></script>
+    
+    <!-- Bibliotecas -->
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
