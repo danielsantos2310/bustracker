@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -18,7 +18,7 @@ body {
 }
 
 header {
-    background: #0056b3;
+    background-color: #0056b3;
     color: white;
     padding: 15px;
 }
@@ -26,23 +26,75 @@ header {
 .controls {
     display: flex;
     gap: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
     flex-wrap: wrap;
-    padding: 10px 0;
 }
 
 button, input, select {
     padding: 8px 15px;
     border-radius: 5px;
-    border: 2px solid #ffc107;
+    border: none;
 }
 
 button {
-    background: #ffc107;
+    background-color: #ffc107;
+    color: #000;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #e0a800;
+}
+
+#btn-add-stops.active {
+    background-color: #28a745;
+    color: white;
+}
+
+input, select {
+    border: 2px solid #ffc107;
+    min-width: 200px;
 }
 
 #map {
     flex: 1;
-    background: #f0f0f0;
+    background-color: #f0f0f0;
+}
+
+.leaflet-draw-toolbar a {
+    background-color: white !important;
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+    }
+    
+    input, select {
+        width: 100%;
+    }
+}
+
+.stop-icon {
+    font-size: 1em;
+    text-align: center;
+    text-shadow: 0 0 3px white;
+    cursor: pointer;
+}
+.stop-icon.destaque {
+    font-size: 1.3em;
+    animation: pulse 2s infinite;
+    z-index: 1000;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.leaflet-popup-content {
+    min-width: 150px;
 }

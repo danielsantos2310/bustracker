@@ -5,29 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Rotas de Ônibus</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Editor de Rotas</h1>
+            <h1>Editor de Rotas de Ônibus</h1>
             <div class="controls">
-                <button id="novarota">✏️ Nova Rota</button>
-                <input type="text" id="nome" placeholder="Nome da rota">
-                <button id="salvar">💾 Salvar</button>
-                <select id="seletor">
-                    <option value="">-- Selecione --</option>
+                <button id="btn-nova-rota">✏️ Nova Rota</button>
+                <input type="text" id="input-nome" placeholder="Nome da rota">
+                <button id="btn-salvar">💾 Salvar Rota</button>
+                <button id="btn-add-stops">📍 Adicionar Paradas</button>
+                <select id="seletor-rotas">
+                    <option value="">-- Selecione uma rota --</option>
                 </select>
             </div>
         </header>
         <div id="map"></div>
     </div>
 
-    <!-- Carregue suas rotas aqui -->
     <script src="rotas/linha-527.js"></script>
-    
-    <!-- Bibliotecas -->
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
