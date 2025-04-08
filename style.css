@@ -1,100 +1,110 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* ================ Modern Minimalist Theme ================ */
+:root {
+    --primary: #2A3F54;      /* Deep navy */
+    --secondary: #00A896;    /* Teal accent */
+    --background: #F8F9FA;   /* Light gray */
+    --surface: #FFFFFF;      /* Pure white */
+    --text: #2A3F54;         /* Dark text */
 }
 
 body {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+    background: var(--background);
+    font-family: 'Inter', system-ui, sans-serif;
 }
 
-.container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
+/* ================ Header & Controls ================ */
 header {
-    background-color: #0056b3;
-    color: white;
-    padding: 15px;
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 1rem 2rem;
 }
 
 .controls {
-    display: flex;
-    gap: 10px;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.2);
-    flex-wrap: wrap;
-}
-
-button, input, select {
-    padding: 8px 15px;
-    border-radius: 5px;
-    border: none;
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    padding: 1.2rem;
+    gap: 0.8rem;
+    margin: 1rem auto;
+    width: 95%;
+    max-width: 1200px;
 }
 
 button {
-    background-color: #ffc107;
-    color: #000;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    background: linear-gradient(135deg, var(--secondary) 0%, #048A81 100%);
+    color: white !important;
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.2s ease;
+    border: none;
 }
 
 button:hover {
-    background-color: #e0a800;
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,168,150,0.2);
 }
 
 #btn-add-stops.active {
-    background-color: #28a745;
-    color: white;
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%);
 }
 
 input, select {
-    border: 2px solid #ffc107;
-    min-width: 200px;
+    background: var(--surface);
+    border: 2px solid #E9ECEF;
+    border-radius: 8px;
+    padding: 0.8rem;
+    transition: all 0.2s ease;
 }
 
+input:focus, select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(0,168,150,0.1);
+}
+
+/* ================ Map Styling ================ */
 #map {
-    flex: 1;
-    background-color: #f0f0f0;
+    border-radius: 16px;
+    margin: 1rem auto;
+    width: 95%;
+    height: 70vh;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.04);
 }
 
-.leaflet-draw-toolbar a {
-    background-color: white !important;
-}
-
-@media (max-width: 768px) {
-    .controls {
-        flex-direction: column;
-    }
-    
-    input, select {
-        width: 100%;
-    }
-}
-
+/* ================ Stop Markers ================ */
 .stop-icon {
-    font-size: 1em;
-    text-align: center;
-    text-shadow: 0 0 3px white;
-    cursor: pointer;
-}
-.stop-icon.destaque {
-    font-size: 1.3em;
-    animation: pulse 2s infinite;
-    z-index: 1000;
-}
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    font-size: 1.4rem;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: all 0.2s ease;
 }
 
+.stop-icon.destaque {
+    font-size: 1.8rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* ================ Popup Design ================ */
 .leaflet-popup-content {
-    min-width: 150px;
+    font-family: 'Inter', sans-serif;
+    padding: 0.8rem;
+    min-width: 180px;
+}
+
+.leaflet-popup-content b {
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+    display: block;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+    border: 1px solid rgba(0,0,0,0.04);
 }
