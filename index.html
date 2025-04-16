@@ -22,8 +22,22 @@
                     <option value="">-- Selecione uma rota --</option>
                 </select>
             </div>
+            <div class="view-switcher">
+                <button class="view-btn active" data-view="map">🗺 Mapa</button>
+                <button class="view-btn" data-view="timetable">⏱ Horário</button>
+            </div>
         </header>
         <div id="map"></div>
+        <div id="timetable-view" class="hidden">
+            <div class="timetable-header">
+                <h2>Previsão Linha 527</h2>
+                <div class="time-controls">
+                    <input type="time" id="start-time" value="06:00">
+                    <button id="refresh-timetable">🔄 Atualizar</button>
+                </div>
+            </div>
+            <div id="timetable-container"></div>
+        </div>
     </div>
 
     <script src="rotas/linha-527.js"></script>

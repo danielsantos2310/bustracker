@@ -197,6 +197,52 @@ map.on(L.Draw.Event.CREATED, (e) => {
         rotaAtual = e.layer.addTo(map);
     }
 });
+// Add to existing JS
+let currentView = 'map';
+
+function showView(view) {
+    document.querySelectorAll('[data-view]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+    });
+    document.getElementById('map').classList.toggle('hidden', view !== 'map');
+    document.getElementById('timetable-view').classList.toggle('hidden', view !== 'timetable');
+    currentView = view;
+}
+
+async function loadTimetable() {
+    const startTime = document.getElementById('start-time').value;
+    try {
+        const response = await fetch(`http://localhost:3000/api/timetable/527?startTime=${startTime}`);
+        const timetable = await response.json();
+        
+        const container = document.getElementById('timetable-container');
+        container.innerHTML = timetable.map(entry => `
+            <div class="timetable-entry">
+                <span class="time-badge">${entry.time}</span>
+                <div>
+                    <div class="stop-coords">${entry.lat.toFixed(6)}, ${entry.lng.toFixed(6)}</div>
+                    <div class="distance">${(entry.distanceFromStart/1000).toFixed(1)} km do início</div>
+                </div>
+                <span class="sequence">#${entry.sequence}</span>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading timetable:', error);
+        alert('Erro ao carregar horário');
+    }
+}
+
+// Add event listeners
+document.querySelector('.view-switcher').addEventListener('click', (e) => {
+    if (e.target.classList.contains('view-btn')) {
+        const view = e.target.dataset.view;
+        showView(view);
+        if (view === 'timetable') loadTimetable();
+    }
+});
+
+document.getElementById('refresh-timetable').addEventListener('click', loadTimetable);
+document.getElementById('start-time').addEventListener('change', loadTimetable);
 
 // Initialize the app
 initDrawTools();
