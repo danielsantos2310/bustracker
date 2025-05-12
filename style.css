@@ -1,10 +1,10 @@
 /* ================ Modern Minimalist Theme ================ */
 :root {
-    --primary: #2A3F54;      /* Deep navy */
-    --secondary: #00A896;    /* Teal accent */
-    --background: #F8F9FA;   /* Light gray */
-    --surface: #FFFFFF;      /* Pure white */
-    --text: #2A3F54;         /* Dark text */
+    --primary: #2A3F54;      
+    --secondary: #00A896;    
+    --background: #F8F9FA;   
+    --surface: #FFFFFF;      
+    --text: #2A3F54;         
 }
 
 body {
@@ -174,4 +174,14 @@ input:focus, select:focus {
 
 .hidden {
     display: none;
+}
+
+.bus-stop-icon {
+    cursor: pointer;
+    filter: hue-rotate(120deg);
+    transition: transform 0.2s;
+}
+
+.bus-stop-icon:hover {
+    transform: scale(1.3);
 }

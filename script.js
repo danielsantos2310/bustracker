@@ -4,7 +4,31 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Global variables
+// Create a layer group for all stops
+const stopsLayer = L.layerGroup().addTo(map);
+
+function plotAllStops() {
+  stopsLayer.clearLayers();
+
+  Object.values(window.allStops).forEach(stop => {
+    L.marker([stop.lat, stop.lng], {
+      icon: L.divIcon({
+        className: 'bus-stop-icon',
+        html: '🚏',
+        iconSize: [24, 24]
+      })
+    })
+    .bindPopup(`
+      <b>${stop.name}</b><br>
+      <small>ID: ${stop.id}</small><br>
+      Linhas: ${stop.routes.join(', ')}
+    `)
+    .addTo(stopsLayer);
+  });
+}
+
+plotAllStops();
+
 let rotas = window.rotasPredefinidas || {};
 let rotaAtual = null;
 let drawControl;
@@ -12,7 +36,6 @@ let routeMarkers = [];
 let stopMarkers = [];
 let isAddingStops = false;
 
-// Initialize drawing tools
 function initDrawTools() {
     drawControl = new L.Control.Draw({
         draw: {
@@ -34,7 +57,6 @@ function initDrawTools() {
     map.addControl(drawControl);
 }
 
-// Toggle stop adding mode
 function toggleStopAdding() {
     isAddingStops = !isAddingStops;
     const btn = document.getElementById('btn-add-stops');
@@ -50,7 +72,6 @@ function toggleStopAdding() {
     }
 }
 
-// Add stop manually
 function addStopManually(e) {
     const stopMarker = L.marker(e.latlng, {
         icon: L.divIcon({
@@ -65,7 +86,6 @@ function addStopManually(e) {
     stopMarkers.push(stopMarker);
     console.log('New stop coordinate:', [e.latlng.lat, e.latlng.lng]);
     
-    // Update popup when dragged
     stopMarker.on('dragend', function() {
         const newPos = stopMarker.getLatLng();
         stopMarker.setPopupContent(`<b>Nova Parada</b><br>Lat: ${newPos.lat.toFixed(6)}<br>Lng: ${newPos.lng.toFixed(6)}`);
@@ -73,7 +93,6 @@ function addStopManually(e) {
     });
 }
 
-// Clear all map layers
 function clearMap() {
     if (rotaAtual) {
         map.removeLayer(rotaAtual);
@@ -85,7 +104,6 @@ function clearMap() {
     stopMarkers = [];
 }
 
-// Load routes into selector
 function atualizarSeletor() {
     const seletor = document.getElementById('seletor-rotas');
     seletor.innerHTML = '<option value="">-- Selecione --</option>';
@@ -98,14 +116,12 @@ function atualizarSeletor() {
     });
 }
 
-// Load route on map
 function carregarRota(nome) {
     if (!rotas[nome]) return;
     
     clearMap();
     
     try {
-        // Add route line if coordinates exist
         if (rotas[nome].coordenadas && rotas[nome].coordenadas.length > 1) {
             rotaAtual = L.polyline(rotas[nome].coordenadas, {
                 color: '#0056b3',
@@ -114,7 +130,6 @@ function carregarRota(nome) {
             }).addTo(map);
         }
 
-        // Add stops if they exist
         if (rotas[nome].paradas && Array.isArray(rotas[nome].paradas)) {
             rotas[nome].paradas.forEach(parada => {
                 if (parada.coordenada && parada.coordenada.length === 2) {
@@ -131,7 +146,6 @@ function carregarRota(nome) {
             });
         }
 
-        // Fit bounds to show everything
         const bounds = new L.LatLngBounds();
         if (rotaAtual) bounds.extend(rotaAtual.getBounds());
         routeMarkers.forEach(marker => bounds.extend(marker.getLatLng()));
@@ -144,7 +158,6 @@ function carregarRota(nome) {
     }
 }
 
-// Save new route
 function salvarRota() {
     if (!rotaAtual) return alert('Desenhe uma rota primeiro!');
     
@@ -169,7 +182,6 @@ function salvarRota() {
         paradas: paradas
     };
     
-    // Generate JS code
     const codigo = `// ${nome}.js\nconst rotasPredefinidas = window.rotasPredefinidas || {};\nrotasPredefinidas['${nome}'] = ${JSON.stringify(rotas[nome], null, 4)};\nwindow.rotasPredefinidas = rotasPredefinidas;`;
     console.log('Código para salvar:\n\n' + codigo);
     
@@ -177,7 +189,6 @@ function salvarRota() {
     alert('Rota salva! Verifique o console para o código.');
 }
 
-// Event Listeners
 document.getElementById('btn-nova-rota').addEventListener('click', () => {
     clearMap();
     map.removeControl(drawControl);
@@ -191,13 +202,12 @@ document.getElementById('seletor-rotas').addEventListener('change', (e) => {
     carregarRota(e.target.value);
 });
 
-// Handle drawn routes
 map.on(L.Draw.Event.CREATED, (e) => {
     if (e.layerType === 'polyline') {
         rotaAtual = e.layer.addTo(map);
     }
 });
-// Add to existing JS
+
 let currentView = 'map';
 
 function showView(view) {
@@ -232,7 +242,65 @@ async function loadTimetable() {
     }
 }
 
-// Add event listeners
+
+
+function getAddressFromCoords(lat, lng, callback) {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+    
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        callback(data.display_name || "Address not found");
+      });
+}
+
+map.on('click', e => {
+    getAddressFromCoords(e.latlng.lat, e.latlng.lng, address => {
+      L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`<b>Location:</b><br>${address}`)
+        .openOn(map);
+    });
+});
+
+function loadBusStops() {
+    const bounds = map.getBounds();
+    const query = `
+      [out:json];
+      (
+        node["highway"="bus_stop"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+        node["public_transport"="platform"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+      );
+      out body;
+      >;
+      out skel qt;
+    `;
+  
+    fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        data.elements.forEach(stop => {
+          if (stop.lat && stop.lon) {
+            L.marker([stop.lat, stop.lon], {
+              icon: L.divIcon({
+                className: 'bus-stop-icon',
+                html: '🚏',
+                iconSize: [24, 24]
+              })
+            })
+            .bindPopup(`
+              <b>Bus Stop</b><br>
+              ${stop.tags?.name || 'Unnamed Stop'}<br>
+              ${stop.tags?.description || ''}
+            `)
+            .addTo(map);
+          }
+        });
+      });
+}
+
+map.on('moveend', loadBusStops);
+
 document.querySelector('.view-switcher').addEventListener('click', (e) => {
     if (e.target.classList.contains('view-btn')) {
         const view = e.target.dataset.view;
@@ -244,6 +312,17 @@ document.querySelector('.view-switcher').addEventListener('click', (e) => {
 document.getElementById('refresh-timetable').addEventListener('click', loadTimetable);
 document.getElementById('start-time').addEventListener('change', loadTimetable);
 
-// Initialize the app
 initDrawTools();
 atualizarSeletor();
+
+
+
+const customIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
+    iconSize: [25, 41], // size of the icon
+    iconAnchor: [12, 41], // point of the icon which will correspond to marker's location
+    popupAnchor: [1, -34], // point from which the popup should open relative to the iconAnchor
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+    shadowSize: [41, 41] // size of the shadow
+});
+
